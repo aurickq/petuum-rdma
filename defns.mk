@@ -20,7 +20,7 @@ PETUUM_CXXFLAGS = -g \
            -fno-omit-frame-pointer
 
 # comment out if not planning to use petuum stats
-#PETUUM_CXXFLAGS += -DPETUUM_STATS
+PETUUM_CXXFLAGS += -DPETUUM_STATS
 
 PETUUM_INCFLAGS = -I$(PETUUM_SRC) -I$(PETUUM_THIRD_PARTY_INCLUDE)
 PETUUM_LDFLAGS = -Wl,-rpath,$(PETUUM_THIRD_PARTY_LIB) \
