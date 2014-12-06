@@ -30,8 +30,8 @@ except:
 subprocess.call([
   'python',
   gen_script_path,
-  str(30),                   # block-width
-  str(30),                   # num-diag-blocks
+  str(100),                   # block-width
+  str(50),                   # num-diag-blocks
   str(0.1),                  # off-diag-density
   data_path,
 ])
@@ -72,6 +72,6 @@ for ssp in ssp_params:
   ])
 
   while True:
-    if glob.glob(os.path.join(res_dir, 'output*')):
+    if glob.glob(os.path.join(res_dir, 'stats.*')):
       break
     time.sleep(1)
