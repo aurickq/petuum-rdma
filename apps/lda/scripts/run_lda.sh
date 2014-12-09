@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 
 # Input files:
-doc_filename="datasets/20news1"
-host_filename="scripts/localserver"
+doc_filename=$1
+host_filename=$3
 
 # LDA parameters:
-num_topics=100
+num_topics=1000
 alpha=0.1
 beta=0.1
 
 # Execution parameters:
-num_work_units=5
+num_work_units=100
 num_iters_per_work_unit=1
 num_clocks_per_work_unit=1
 compute_ll_interval=1
 
 # System parameters:
 client_worker_threads=1
-staleness=0
+staleness=$4
 word_topic_table_process_cache_capacity=-1 # -1 sets process cache to num_vocabs
 summary_table_staleness=$staleness
 word_topic_table_staleness=$staleness
@@ -53,7 +53,7 @@ do
   cp -r $doc_filename.$i.bak $doc_filename.$i
 done
 
-output_dir=$app_dir/output
+output_dir=$2
 output_dir="${output_dir}/lda.S${staleness}"
 output_dir="${output_dir}.M${num_unique_hosts}"
 output_dir="${output_dir}.T${client_worker_threads}"
