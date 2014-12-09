@@ -13,26 +13,10 @@ data_dir = os.path.join(petuum_dir, 'data')
 app_dir = os.path.join(petuum_dir, 'apps', 'lda')
 
 app_script_path = os.path.join(app_dir, 'scripts', 'run_lda.sh')
-gen_script_path = os.path.join(app_dir, 'bin', 'data_preprocessor')
 data_path = os.path.join(data_dir, 'lda_data')
 hostfile_path = os.path.join(petuum_dir, 'hostfile')
-raw_data_path = os.path.join(petuum_dir, 'nytimes', 'nytimes.dat')
 
 ssp_params = [0, 1, 2, 4, 8, 16]
-
-print 'Making data for LDA...'
-
-try:
-  os.makedirs(data_dir)
-except:
-  pass
-
-subprocess.call([
-  gen_script_path,
-  raw_data_path,
-  data_path,
-  8,
-])
 
 try:
   os.makedirs(results_dir)
