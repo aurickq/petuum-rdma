@@ -43,6 +43,7 @@ for ssp in ssp_params:
     os.path.join(res_dir, 'output'),
     hostfile_path,
     str(ssp),
+    os.path.join(res_dir, 'stats'),
   ])
 
   while True:

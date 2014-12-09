@@ -60,6 +60,8 @@ output_dir="${output_dir}.T${client_worker_threads}"
 rm -rf ${output_dir}
 mkdir -p ${output_dir}
 
+stats_path=$5
+
 output_file_prefix=${output_dir}/lda_out  # Prefix for program output files.
 
 # Kill previous instances of this program
@@ -99,7 +101,8 @@ for ip in $unique_host_list; do
       $word_topic_table_process_cache_capacity \
       --client_id ${client_id} \
       --output_file_prefix ${output_file_prefix} \
-      --disk_stream=$disk_stream"
+      --disk_stream=$disk_stream \
+      --stats_path=$stats_path"
 
   ssh $ssh_options $ip $cmd &
   #eval $cmd  # Use this to run locally (on one machine).
