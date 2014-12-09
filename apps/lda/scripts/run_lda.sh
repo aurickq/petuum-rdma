@@ -5,12 +5,12 @@ doc_filename=$1
 host_filename=$3
 
 # LDA parameters:
-num_topics=1000
+num_topics=500
 alpha=0.1
 beta=0.1
 
 # Execution parameters:
-num_work_units=10
+num_work_units=20
 num_iters_per_work_unit=1
 num_clocks_per_work_unit=1
 compute_ll_interval=1
