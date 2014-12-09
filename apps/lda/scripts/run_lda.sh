@@ -16,7 +16,7 @@ num_clocks_per_work_unit=1
 compute_ll_interval=1
 
 # System parameters:
-client_worker_threads=1
+client_worker_threads=16
 staleness=$4
 word_topic_table_process_cache_capacity=-1 # -1 sets process cache to num_vocabs
 summary_table_staleness=$staleness
