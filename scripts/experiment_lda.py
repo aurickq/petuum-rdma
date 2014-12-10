@@ -16,7 +16,7 @@ app_script_path = os.path.join(app_dir, 'scripts', 'run_lda.sh')
 data_path = os.path.join(data_dir, 'lda_data')
 hostfile_path = os.path.join(petuum_dir, 'hostfile')
 
-ssp_params = [0, 1, 2, 4, 8, 16]
+ssp_params = [0, 1, 2, 4, 8]
 
 try:
   os.makedirs(results_dir)

@@ -18,7 +18,7 @@ gen_script_path = os.path.join(app_dir, 'sampledata', 'make_synth_data.py')
 data_path = os.path.join(data_dir, 'matrixfact_data')
 hostfile_path = os.path.join(petuum_dir, 'hostfile')
 
-ssp_params = [0, 1, 2, 4, 8, 16]
+ssp_params = [0, 1, 2, 4, 8]
 
 print 'Making data for matrixfact...'
 
