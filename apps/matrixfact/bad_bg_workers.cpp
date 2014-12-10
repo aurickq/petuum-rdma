@@ -675,76 +675,81 @@ void FakeFree(void *data, void *hint) {}
 
 void BgWorkers::CommBusRecvAnyBusyIncludingRDMA(int32_t *sender_id,
                                                 zmq::message_t *zmq_msg) {
-  // VLOG(0) << "CommBusRecvAnyBusyIncludingRDMA";
-  bool received = (comm_bus_->*CommBusRecvAsyncAny)(sender_id, zmq_msg);
+  bool received = false;
   while (!received) {
-    received = (comm_bus_->*CommBusRecvAsyncAny)(sender_id, zmq_msg);
-  }
-  MsgType msg_type;
-  void *msg_mem;
-  msg_type = MsgBase::get_msg_type(zmq_msg->data());
-  // if (msg_type == kMemTransfer) {
-  //   MemTransferMsg mem_transfer_msg(zmq_msg->data());
-  //   msg_mem = mem_transfer_msg.get_mem_ptr();
-  //   msg_type = MsgBase::get_msg_type(msg_mem);
-  // }
-
-  if (msg_type == kServerPushRow) {
-    ServerPushRowMsg server_push_row_msg(msg_mem);
-    int entity_id = ZMQUtil::ZmqID2EntityID(*((int32_t *)zmq_msg->data()));
-    VLOG(0) << "Pull? *sender_id=" << *sender_id
-            << ", entity_id?=" << entity_id << ", local?" << comm_bus_->IsLocalEntity(entity_id);
-    // if (!server_push_row_msg.get_is_clock() ||
-    // !comm_bus_->IsLocalEntity(entity_id)) {
-    VLOG(0) << "Attempting to pull message with *sender_id=" << *sender_id;
-
-    for (auto i = comm_bus_->RDMAPullers.cbegin(),
-              e = comm_bus_->RDMAPullers.cend();
-         i != e; ++i) {
-      VLOG(0) << "Pullers[" << i->first << "] is a puller.";
+    // Check queue based on cycling through each one and getting a message
+    if (currentQueue == comm_bus_->RDMAPullers.size()) {
+      // Do ZMQ recv
+      received = (comm_bus_->*CommBusRecvAsyncAny)(sender_id, zmq_msg);
+      
+      // Only do once to process other queues if needed
+      // VLOG(0) << "CommBusRecvAnyBusyIncludingRDMA";
+      //while (!received) {
+      //  received = (comm_bus_->*CommBusRecvAsyncAny)(sender_id, zmq_msg);
+      //}
+      currentQueue = 0;
     }
+    else {
+      // Calc sender id
+      int client = (currentQueue == 0) ? 1 : (1000 * currentQueue);
 
-    std::unique_ptr<RDMAMessagePuller<RDMA_CLIENT_BUFFER_SIZE> > &puller =
-        comm_bus_->RDMAPullers[*sender_id];
+      // Check for message in queue
+      //VLOG(0) << "Pull? Checking Queue " << currentQueue << " for sender " << client;
+      //VLOG(0) << "Attempting to pull message with *sender_id=" << *sender_id;
 
-    // uint64_t test_msg = 2;
-    // VLOG(0) << *puller;
-    // for (int i=0; !puller->Pull(&test_msg, sizeof test_msg); ++i)
-    //   if(i % 10000000 == 0) VLOG(0) << "Pull waiting..."<<i;
-    // // VLOG(0) << *puller;
-    // // VLOG(0) << "test_msg: " << test_msg;
-    // CHECK(test_msg==42);
-    // VLOG(0) << "Successfully pulled.";
+      //for (auto i = comm_bus_->RDMAPullers.cbegin(),
+      //          e = comm_bus_->RDMAPullers.cend();
+      //     i != e; ++i) {
+      //  VLOG(0) << "Pullers[" << i->first << "] is a puller.";
+      //}
 
-    uint64_t msg_size;
-    VLOG(0) << "Attempting to pull maybe-length " << &puller;
-    // sleep(1);
-    // VLOG(0) << "Sleep done ";
-    // VLOG(0) << puller->client_head_ -
-    // (uint64_t)&puller->client_buf_and_tail_
-    //         << puller->client_buf_and_tail_.client_tail_ -
-    //                (uint64_t)&puller->client_buf_and_tail;
-    // VLOG(0) << *puller;
-    while (!puller->Pull(&msg_size, sizeof msg_size))
-      ;
-    VLOG(0) << "Pulled maybe-length " << msg_size;
-    if (msg_size == UINT64_MAX) {  // signal that tail wrapped around
-      while (!puller->WrapHead())
-        ;
-      while (!puller->Pull(&msg_size, sizeof msg_size))
-        ;
-      VLOG(0) << "Pulled real-length " << msg_size;
-    }
-    VLOG(0) << "Pulling data ";
-    while (!puller->Pull(&MessageCopyBuffer, msg_size))
-      ;
-    VLOG(0) << "Pulled data ";
-    uint8_t *data_loc = (uint8_t *)MessageCopyBuffer;
+      std::unique_ptr<RDMAMessagePuller<RDMA_CLIENT_BUFFER_SIZE> > &puller =
+          comm_bus_->RDMAPullers[client];
 
-    zmq_msg->rebuild(data_loc, msg_size, &FakeFree);
+      uint64_t msg_size;
+      //VLOG(0) << "Attempting to pull maybe-length " << &puller;
+      
+      // Check if message waiting
+      if (puller->Pull(&msg_size, sizeof msg_size) != 0)
+      {
+        // Process message
+        VLOG(0) << "Pulled maybe-length " << msg_size;
+        if (msg_size == UINT64_MAX) {  // signal that tail wrapped around
+          while (!puller->WrapHead())
+            ;
+          while (!puller->Pull(&msg_size, sizeof msg_size))
+            ;
+          VLOG(0) << "Pulled real-length " << msg_size;
+        }
+        VLOG(0) << "Pulling data ";
+        while (!puller->Pull(&MessageCopyBuffer, msg_size))
+          ;
+        VLOG(0) << "Pulled data ";
+        uint8_t *buf = (uint8_t*)malloc(sizeof(uint8_t) * msg_size);
+        uint8_t *data_loc = (uint8_t *)MessageCopyBuffer;
+        memcpy(buf, data_loc, msg_size);
 
-    VLOG(0) << "SUCCESSFUL Pull MAYBE...";
-    // }
+        waitingData.push_back(new zmq::message_t(buf, msg_size, [](void* d, void* h){ free(d); }));
+
+        //if (zmq_msg->size() != msg_size) {
+        //  VLOG(0) << "WRONG SIZE";
+        //  throw 1;
+        //}
+        if (memcmp(data_loc, buf, msg_size) != 0) {
+          VLOG(0) << "WRONG DATA";
+          VLOG(0) << memcmp(zmq_msg->data(), buf, msg_size);
+          for (int i = 0; i < msg_size; i++) {
+            VLOG(0) << "Addr: " << i << " loc: " << (int)data_loc[i] << ", zmq: " << (int)(((uint8_t*)zmq_msg->data())[i]);
+          }
+          throw 1;
+        }
+
+        received = true;
+        VLOG(0) << "SUCCESSFUL Pull MAYBE...";
+      }
+      // Move to next queue.
+      currentQueue++;
+    } 
   }
 }
 

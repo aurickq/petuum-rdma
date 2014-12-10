@@ -34,6 +34,8 @@ PETUUM_LDFLAGS = -Wl,-rpath,$(PETUUM_THIRD_PARTY_LIB) \
           -ltcmalloc \
           -lconfig++ \
 	  -lyaml-cpp \
-	  -lleveldb
+	  -lleveldb \
+		-libverbs \
+		-lrdmacm 
 PETUUM_PS_LIB = $(PETUUM_LIB)/libpetuum-ps.a
 PETUUM_PS_SN_LIB = $(PETUUM_LIB)/libpetuum-ps-sn.a

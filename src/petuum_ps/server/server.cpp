@@ -310,7 +310,7 @@ void Server::CreateSendServerPushRowMsgs(PushMsgSendFunc PushMsgSend) {
 
   for (client_id = 0; client_id < GlobalContext::get_num_clients();
        ++client_id) {
-    //VLOG(0) << "Send out to client " << client_id;
+    VLOG(0) << "Send out to client " << client_id;
     int32_t head_bg_id = GlobalContext::get_head_bg_id(client_id);
     // Set separator between tables
     for (int32_t i = 0; i < GlobalContext::get_num_bg_threads(); ++i) {
@@ -325,7 +325,7 @@ void Server::CreateSendServerPushRowMsgs(PushMsgSendFunc PushMsgSend) {
       }
       *table_end_ptr = GlobalContext::get_serialized_table_end();
       msg_map[bg_id]->get_avai_size() = buffs[bg_id].GetMemUsedSize();
-      //VLOG(0) << "End! Send msg out to " << bg_id;
+      VLOG(0) << "End! Send msg out to " << bg_id;
       PushMsgSend(bg_id, msg_map[bg_id], true);
       delete msg_map[bg_id];
     }

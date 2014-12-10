@@ -58,7 +58,7 @@ public:
     MemBlock::MemFree(reinterpret_cast<uint8_t*>(mem));
   }
 
-private:
+// private:
   // Use msg's content to construct a MemTransferMsg to transfer memory
   // ownership between threads. That means if msg's mem should not be destroyed
   // by the sender. Therefore, InitMemTransferMsg lets msgg release its control

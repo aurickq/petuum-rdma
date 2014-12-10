@@ -104,6 +104,7 @@ private:
   static CommBus::RecvFunc CommBusRecvAny;
   static CommBus::RecvTimeOutFunc CommBusRecvTimeOutAny;
   static CommBus::SendFunc CommBusSendAny;
+  static CommBus::SendFunc CommBusSendAnyRDMA;
   static CommBus::RecvAsyncFunc CommBusRecvAsyncAny;
   static CommBus::RecvWrapperFunc CommBusRecvAnyWrapper;
 

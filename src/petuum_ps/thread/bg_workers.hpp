@@ -48,6 +48,11 @@ namespace petuum {
 
 // Relies on GlobalContext being properly initalized.
 
+static uint8_t MessageCopyBuffer[4*1024*1024];
+void FakeFree (void *data, void *hint);
+static int32_t currentQueue;
+static std::vector<zmq::message_t *> waitingData;
+
 class BgWorkers {
 public:
   static void Init(std::map<int32_t, ClientTable* > *tables_);
@@ -172,6 +177,7 @@ private:
   static CommBus::RecvWrapperFunc CommBusRecvAnyWrapper;
 
   static void CommBusRecvAnyBusy(int32_t *sender_id, zmq::message_t *zmq_msg);
+  static void CommBusRecvAnyBusyIncludingRDMA(int32_t *sender_id, zmq::message_t *zmq_msg);
   static void CommBusRecvAnySleep(int32_t *sender_id, zmq::message_t *zmq_msg);
 
   /* Data members needed by server push */

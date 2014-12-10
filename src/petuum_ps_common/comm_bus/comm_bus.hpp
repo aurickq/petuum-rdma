@@ -38,6 +38,13 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/noncopyable.hpp>
+#include <petuum_ps_common/comm_bus/rdma_utils.hpp>
+#include <unordered_map>
+
+#define RDMA_CLIENT_BUFFER_SIZE 1<<28
+#define RDMA_SERVER_BUFFER_SIZE 1<<28
+// #define RDMA_CLIENT_BUFFER_SIZE 32
+// #define RDMA_SERVER_BUFFER_SIZE 32
 
 namespace petuum {
 
@@ -60,6 +67,11 @@ public:
   static const int kNone = 0;
   static const int kInProc = 1;
   static const int kInterProc = 2;
+
+  // These should be a map from client ID to RDMA connection/listener handle
+  // Each node should have one entry per client in these maps.
+  std::unordered_map<int32_t, std::unique_ptr<RDMAMessagePusher<RDMA_SERVER_BUFFER_SIZE> > > RDMAPushers;
+  std::unordered_map<int32_t, std::unique_ptr<RDMAMessagePuller<RDMA_CLIENT_BUFFER_SIZE> > > RDMAPullers;
 
   struct Config : boost::noncopyable {
   public:
@@ -139,6 +151,7 @@ public:
     void *connect_msg, size_t size);
 
   size_t Send(int32_t entity_id, const void *data, size_t len);
+  size_t SendRDMA(int32_t entity_id, const void *data, size_t len);
   size_t SendInProc(int32_t entity_id, const void *data, size_t len);
   size_t SendInterProc(int32_t entity_id, const void *data, size_t len);
 
