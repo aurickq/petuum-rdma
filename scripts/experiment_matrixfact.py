@@ -31,7 +31,7 @@ subprocess.call([
   'python',
   gen_script_path,
   str(100),                   # block-width
-  str(50),                   # num-diag-blocks
+  str(100),                   # num-diag-blocks
   str(0.1),                  # off-diag-density
   data_path,
 ])
@@ -63,8 +63,8 @@ for ssp in ssp_params:
   subprocess.call([
     app_script_path,
     data_path,
-    str(30),            # K
-    str(100),           # iters
+    str(100),           # K
+    str(50),            # iters
     os.path.join(res_dir, 'output'),
     hostfile_path,
     str(16),            # client_worker_threads
