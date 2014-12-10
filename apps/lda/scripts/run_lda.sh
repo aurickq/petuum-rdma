@@ -21,8 +21,8 @@ staleness=$4
 word_topic_table_process_cache_capacity=-1 # -1 sets process cache to num_vocabs
 summary_table_staleness=$staleness
 word_topic_table_staleness=$staleness
-num_bg_threads=1
-num_server_threads=1
+num_bg_threads=4
+num_server_threads=4
 disk_stream=false
 
 # Figure out the paths.
